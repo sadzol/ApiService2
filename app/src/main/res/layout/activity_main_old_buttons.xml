@@ -1,0 +1,162 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:layout_gravity="center_vertical"
+    android:background="@drawable/login_background_gradient"
+    tools:context="pl.rcponline.api.MainActivity">
+
+    <LinearLayout
+        android:id="@+id/ll_datatime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/gradient_green"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_weight="1"
+            >
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:src="@drawable/ic_action_time" />
+
+        <TextView
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format24Hour="H:mm a"
+            android:paddingLeft="15dp"
+            android:paddingRight="10dp"
+            android:textColor="#FFF"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/im_synchronized"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:src="@drawable/ic_action_refresh"
+            />
+
+    </LinearLayout>
+    <!--<ProgressBar-->
+        <!--android:id="@+id/progressBar1"-->
+        <!--style="?android:attr/progressBarStyleLarge"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/tv_time"-->
+        <!--android:layout_centerHorizontal="true" />-->
+    <TableLayout
+        android:id="@+id/event_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll_datatime"
+        android:orientation="vertical">
+
+        <TableRow >
+
+            <Button
+                android:id="@+id/bt_start"
+                style="@style/EventButtonEnabled"
+                android:layout_width="0px"
+                android:layout_weight="0.5"
+                android:background="@drawable/gradient3_green"
+                android:text="@string/event_work_start"
+                android:clickable="false"/>
+            <Button
+                android:id="@+id/bt_finish"
+                style="@style/EventButtonEnabled"
+                android:layout_width="0px"
+                android:layout_weight="0.5"
+                android:background="@drawable/gradient3_red"
+                android:text="@string/event_work_finish"
+
+                />
+
+        </TableRow>
+
+        <TableRow >
+
+            <Button
+                android:id="@+id/bt_temp_start"
+                style="@style/EventButtonEnabled"
+                android:layout_width="0px"
+                android:layout_weight="0.5"
+                android:background="@drawable/gradient3_orange"
+                android:text="@string/event_temp_start" />
+
+            <Button
+                android:id="@+id/bt_temp_finish"
+                style="@style/EventButtonEnabled"
+                android:layout_width="0px"
+                android:layout_weight="0.5"
+                android:background="@drawable/gradient3_green"
+                android:text="@string/event_temp_finish"/>
+
+            <Button
+                android:id="@+id/bt_break_start"
+                style="@style/EventButtonEnabled"
+                android:layout_width="0px"
+                android:layout_weight="0.5"
+                android:background="@drawable/gradient3_blue"
+                android:text="@string/event_break_start"/>
+
+            <Button
+                android:id="@+id/bt_break_finish"
+                style="@style/EventButtonEnabled"
+                android:layout_width="0px"
+                android:layout_weight="0.5"
+                android:background="@drawable/gradient3_green"
+                android:text="@string/event_break_finish"/>
+        </TableRow>
+    </TableLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_last_events"
+        android:layout_below="@+id/event_buttons"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/gradient_background_last_events"
+            android:text="@string/last_events"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:padding="@dimen/box_name_last_events"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.2dp"
+            android:background="#DCDFE3"
+            android:visibility="visible"
+            />
+
+        <ListView
+            android:id="@+id/lv_last_events"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/event_buttons">
+
+        </ListView>
+
+    </LinearLayout>
+
+</RelativeLayout>

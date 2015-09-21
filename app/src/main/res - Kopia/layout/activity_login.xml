@@ -1,0 +1,48 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_background_gradient"
+    tools:context="pl.rcponline.api.LoginActivity">
+
+    <RelativeLayout
+        android:id="@+id/rl_inputs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        >
+
+
+        <EditText
+            android:id="@+id/et_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/input"
+            style="@style/LoginInput"
+            android:hint="Login:" />
+
+        <EditText
+            android:id="@+id/et_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/et_log"
+            android:inputType="textPassword"
+            style="@style/LoginInput"
+            android:background="@drawable/input"
+            android:hint="Hasło:" />
+
+        <Button
+            android:id="@+id/bt_sign_up"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/et_password"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/login_button_gradient"
+            android:hint="Zaloguj"
+            android:onClick="signUp" />
+    </RelativeLayout>
+
+
+
+</RelativeLayout>

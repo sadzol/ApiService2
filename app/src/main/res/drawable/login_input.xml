@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <padding
+        android:left="@dimen/login_input_padding"
+        android:right="@dimen/login_input_padding"
+        android:top="@dimen/login_input_padding"
+        android:bottom="@dimen/login_input_padding"/>
+    <shape android:shape="rectangle">
+        <gradient
+            android:angle="90"
+            android:startColor="#323232"
+            android:endColor="#4b4b4b" />
+        <padding
+            android:bottom="15dp"
+            android:top="15dp"
+            android:right="15dp"
+            android:left="15dp"/>
+        <corners android:radius="10dp"/>
+        <stroke
+            android:width="30dp"
+            android:dashGap="@dimen/login_input_padding"
+            />
+    </shape>
+</shape>

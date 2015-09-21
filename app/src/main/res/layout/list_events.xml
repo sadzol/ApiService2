@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background_events"
+    android:padding="10dp"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Small Text"
+        android:textSize="@dimen/list_events_tv_list_events"
+        android:id="@+id/tv_list_events_time" />
+
+    <LinearLayout
+        android:id="@+id/ll_list_event"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_list_events_time"
+        >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/iv_list_events_icon"
+            android:layout_gravity="center"
+            android:src="@drawable/info_play"
+            android:layout_marginRight="5dp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/list_events_tv_list_events"
+            android:textStyle="bold"
+            android:text="Small Text"
+            android:id="@+id/tv_list_events_event" />
+    </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_list_events_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/ll_list_event"
+            android:layout_alignParentRight="true"
+            android:textSize="@dimen/list_events_tv_list_events"
+            tools:text="jiji ji ojoij oijoij oijoijo ijoijio pokpoi poi poi  poip o poipo"
+            android:layout_marginLeft="60dp"
+            android:gravity="right" />
+    </RelativeLayout>
+    <!--<View-->
+        <!--android:id="@+id/list_events_sepator"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="0.2dp"-->
+        <!--android:background="#DCDFE3"-->
+        <!--android:visibility="visible"-->
+
+       <!--/>-->
+</LinearLayout>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:key="location"
+        android:title="@string/register_location"
+        android:summary="@string/register_location_desc"
+        android:defaultValue="true" />
+    <CheckBoxPreference
+        android:key="break"
+        android:title="@string/settings_break"
+        android:summary="@string/settings_break_desc"
+        android:defaultValue="true" />
+
+    <CheckBoxPreference
+        android:key="pay_exit"
+        android:title="@string/settings_pay_exit"
+        android:summary="@string/settings_pay_exit_desc"
+        android:defaultValue="true" />
+
+    <CheckBoxPreference
+        android:key="comment"
+        android:title="@string/settings_comment"
+        android:summary="@string/settings_comment_desc"
+        android:defaultValue="false" />
+
+    <CheckBoxPreference
+        android:key="last_events"
+        android:title="@string/settings_view_last_events"
+        android:summary="@string/settings_view_last_events_desc"
+        android:defaultValue="true" />
+</PreferenceScreen>

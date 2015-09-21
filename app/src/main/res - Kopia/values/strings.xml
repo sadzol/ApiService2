@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">RCPonline.pl - Rejestrator GPS</string>
+    <string name="title_activity_api2">Api2Activity</string>
+    <string name="title_activity_aquery">AQueryActivity</string>
+    <string name="title_activity_login">RCPonline.pl</string>
+    <string name="title_activity_main">RCPonline.pl</string>
+    <string name="title_activity_location_activity_test">LocationActivityTest</string>
+
+    <string name="event_work_start">Rozpoczęcie\npracy</string>
+    <string name="event_break_start">Przerwa</string>
+    <string name="event_break_finish">Koniec\nprzerwy</string>
+    <string name="event_temp_start">Wyjście\nsłużbowe</string>
+    <string name="event_temp_finish">Powrót</string>
+    <string name="event_work_finish">Koniec\npracy</string>
+
+    <string name="no_connection">Brak połączenia z serwerem: Synchronizacja zdarzeń nastąpi automatycznie po prawidłowym połączeniu</string>
+    <string name="save_event">Zapisuje zdarzenie</string>
+    <string name="last_events">Ostatnie zdarzenia</string>
+    <string name="turn_on_localisation">Lokalizacja jest wylączona</string>
+
+    <string name="work_start">Rozpoczęcie pracy</string>
+    <string name="break_start">Przerwa</string>
+    <string name="break_finish">Koniec przerwy</string>
+    <string name="temp_out_start">Wyjście służbowe</string>
+    <string name="temp_out_finish">Powrót</string>
+    <string name="work_finish">Koniec pracy</string>
+
+    <string name="home">Home</string>
+    <string name="settings">Ustawienia</string>
+    <string name="register_location">Zawsze rejestruj lokalizację</string>
+    <string name="register_location_desc"></string>
+    <string name="setting_location_on">Rejestracja zdarzenia bez lokalizacji nie jest możliwa - należy zmienić ustawienia</string>
+    <string name="logout">Wyloguj</string>
+
+    <string name="login">Logowanie..</string>
+    <string name="please_wait">Zapisywanie..</string>
+    <string name="searching">Wyszukiwanie...</string>
+    <string name="synchronized_with_server">Synchronizacja z serwerem...</string>
+    
+    <string name="bad_login_or_pass">Nieprawidłowy login lub hasło</string>
+    <string name="error_unexpected">Błąd: Wystąpił nieoczekiwany błąd</string>
+    <string name="error_500">Błąd 500: Serwer zajęty lub wyłączony</string>
+    <string name="error_404">Błąd 404: Brak połączenia z serwerem</string>
+    <string name="error_offline">Nie można się zalogować - sprawdź połączenie internetowe</string>
+    <string name="location_disabled">Brak informacji - wyłączona opcja lokalizacji w urządzeniu</string>
+    <string name="synchronized_off">Synchronizacja nie jest możliwa - sprawdz połączenie internetowe</string>
+
+    <string name="event_dialog_title">Informacja o lokalizacji nie jest jeszcze dostępna - należy chwilę zaczekać</string>
+    <string name="event_dialog_yes">Ponów</string>
+    <string name="event_dialog_no">Anuluj</string>
+
+    <string name="settings_break">Przerwa</string>
+    <string name="settings_break_desc">Aktywuj przycisk</string>
+    <string name="settings_pay_exit">Wyjście służbowe</string>
+    <string name="settings_pay_exit_desc">Aktywuj przycisk</string>
+    <string name="settings_comment">Komentarz</string>
+    <string name="settings_comment_desc">Udostępnij pole</string>
+    <string name="settings_view_last_events">Ostatnie zdarzenia</string>
+    <string name="settings_view_last_events_desc">Włącz widoczność</string>
+</resources>

@@ -2,12 +2,13 @@ package pl.rcponline.apiservice;
 
 public class Const {
 
-    public static final String ENIVORMENT   = "";//"/app_dev.php";
-    public static final String MAIN_URL     = "http://panel.rcponline.pl";//
-//    public static final String MAIN_URL     = "http://dev-panel.rcponline.pl";//
-//    public static final String MAIN_URL     = "http://192.168.2.101";//rcp.lh  home
-//    public static final String MAIN_URL   = "http://192.168.1.107"; //biuro
-//    public static final String MAIN_URL   = "http://rcp.lh"; //mietka
+//    public static final String ENIVORMENT   = "";
+  public static final String ENIVORMENT   = "/app_dev.php";
+//  public static final String MAIN_URL     = "http://panel.rcponline.pl";//
+  public static final String MAIN_URL     = "http://dev-panel.rcponline.pl";//
+//    public static final String MAIN_URL     = "http://192.168.2.102";//rcp.lh  home
+//  public static final String MAIN_URL   = "http://192.168.1.107"; //biuro
+//  public static final String MAIN_URL   = "http://rcp.lh"; //mietka
     public static final String LOGIN_URL    = MAIN_URL+ENIVORMENT+"/api/loginApp";
     public static final String ADD_EVENT_URL  = MAIN_URL+ENIVORMENT+"/api/addEvent";
     public static final String ADD_EVENTS_URL = MAIN_URL+ENIVORMENT+"/api/addEvents";

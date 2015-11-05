@@ -27,10 +27,10 @@ import java.util.List;
 
 public class DbAdapter {
 
-    private static final int DATABASE_VESRION = 4;
+    private static final int DATABASE_VESRION = 5;
     private static final String DATABASE_NAME = "Rcp.db";
     //liczba wyswietlonych ostatnich eventow
-    private static final String NUMBER_LAST_EVENTS = "6";
+    private static final String NUMBER_LAST_EVENTS = "8";
     private final String TAG = "DATABASE";
 
     //zmienna do przechowywania bazy

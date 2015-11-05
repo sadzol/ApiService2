@@ -13,12 +13,22 @@
         android:layout_marginRight="30dp"
         >
 
-
+        <TextView
+            android:id="@+id/tv_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RCPonline.pl"
+            android:textStyle="bold"
+            android:textSize="32sp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="40dp"
+            android:layout_marginTop="40dp" />
         <EditText
             android:id="@+id/et_log"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/input"
+            android:layout_below="@+id/tv_info"
             style="@style/LoginInput"
             android:hint="Login:" />
 

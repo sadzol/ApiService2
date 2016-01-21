@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">RCPonline.pl - Rejestrator GPS</string>
     <string name="title_activity_api2">Api2Activity</string>
     <string name="title_activity_aquery">AQueryActivity</string>
@@ -32,6 +31,8 @@
     <string name="register_location">Zawsze rejestruj lokalizację</string>
     <string name="register_location_desc"></string>
     <string name="setting_location_on">Rejestracja zdarzenia bez lokalizacji nie jest możliwa - należy zmienić ustawienia</string>
+    <string name="version">Wersja oprogramowania</string>
+    <string name="info">Informacje</string>
     <string name="logout">Wyloguj</string>
 
     <string name="login">Logowanie..</string>
@@ -62,4 +63,7 @@
     <string name="settings_comment_desc">Udostępnij pole</string>
     <string name="settings_view_last_events">Ostatnie zdarzenia</string>
     <string name="settings_view_last_events_desc">Włącz widoczność</string>
+
+    <string name="night_work">Przycisk rozpoczęcia pracy</string>
+    <string name="night_work_summary">Aktywuj zawsze na początku dnia (pozwala uniknąć dodatkowych błędów rejestracji, jeśli nie została zakończona praca w dniu poprzednim)</string>
 </resources>

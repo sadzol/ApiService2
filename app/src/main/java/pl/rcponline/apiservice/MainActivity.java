@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,9 +14,12 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +29,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -42,7 +47,9 @@ import com.androidquery.callback.AjaxStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,16 +80,16 @@ import com.google.gson.reflect.TypeToken;
 
 public class MainActivity extends Activity implements View.OnClickListener,ConnectionCallbacks,OnConnectionFailedListener,LocationListener {
 
-
     private static final String TAG = "MAIN_ACTIVITY";
     private static final String JSON = "JSON";
     //private final String TAG_SESSION = "SESSION";
     private final String TAG_LOC = "LOCATION";
+    private boolean oneEventTypeAtTime = true;
 
     //TextView dataTime;
     AQuery aq;
     String login, password, location, comment, data;
-    int isEventSend, typeId,lastEvenTypeId;
+    int isEventSend, typeId, lastEvenTypeId;
     View lasViewEvent;
     // SESSION MANAGER CLASS
     SessionManager session;
@@ -92,9 +99,10 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
     ImageButton btStart, btFinish, btBreakStart, btBreakFinish, btTempStart, btTempFinish;
 
     ImageView imSynchro,ivStartOff,ivFinishOff,ivBreakOff,ivTempOff;
-    LinearLayout llDatatime,llLastEvent;
+    LinearLayout llDatatime,llLastEvent,llAddress;
     RelativeLayout rlBreak, rlPayExit;
     EditText etComment;
+    TextView tvAddress;
 
     ///////////////LOCATION///////////////////////////////////////////////////////
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
@@ -106,8 +114,8 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
     private LocationRequest mLocationRequest;
 
     // Location updates intervals in sec
-    private static int UPDATE_INTERVAL = 1000; // 1 sec
-    private static int FATEST_INTERVAL = 1000; // 1 sec
+    private static int UPDATE_INTERVAL = 1000; // 1000 = 1 sec
+    private static int FATEST_INTERVAL = 1000; // 1000 = 1 sec
     private static int DISPLACEMENT = 1; // 1 meters
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -184,6 +192,8 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         rlBreak = (RelativeLayout) findViewById(R.id.ll_pause);
         rlPayExit= (RelativeLayout) findViewById(R.id.ll_record);
 
+        tvAddress = (TextView) findViewById(R.id.tv_address);
+
         btStart.setOnClickListener(this);
         btFinish.setOnClickListener(this);
         btBreakStart.setOnClickListener(this);
@@ -212,6 +222,8 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
             mGoogleApiClient.connect();
         }
     }
+
+    // TESTOWAC DISCONETC LOCATION ON PAUSE http://blog.teamtreehouse.com/beginners-guide-location-android
     @Override
     protected void onStop() {
         super.onStop();
@@ -230,7 +242,6 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         Log.d(TAG, "onResume");
         //checkPlayServices();
 
-
         // Resuming the periodic location updates
         if (mGoogleApiClient.isConnected()){
             //Toast.makeText(this,"StartLocationUpdates",Toast.LENGTH_SHORT).show();
@@ -244,6 +255,11 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         viewLastEvents();
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        if(sp.getBoolean("location",false)){
+            tvAddress.setVisibility(View.VISIBLE);
+        }else{
+            tvAddress.setVisibility(View.GONE);
+        }
         if(sp.getBoolean("comment",false)){
             etComment.setVisibility(View.VISIBLE);
         }else {
@@ -288,11 +304,18 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
                 Intent intent  = new Intent(this,SettingsActivity.class);
                 startActivity(intent);
                 return true;
-            case R.id.menu_logout:
 
+            case R.id.menu_info:
+                FragmentManager manager = getFragmentManager();
+                InfoFragment dcf = new InfoFragment();
+                dcf.show(manager, "info");
+                return true;
+
+            case R.id.menu_logout:
                 //todo logout moze service
                 session.logout();
                 return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -307,9 +330,6 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
     @Override
     public void onClick(View v) {
         lasViewEvent = v;
-//        Log.d(TAG,"cos");
-//        Log.d(TAG,String.valueOf(v.getId()));
-//        Log.d(TAG,String.valueOf(R.id.im_synchronized));
         if(v.getId() == R.id.im_synchronized){
             Log.d(TAG,"in");
             synchronizedWithServer();
@@ -352,18 +372,24 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         }
         Log.d(TAG, "EVENTQ " + lastEvenTypeId);
 
-        if(SendEvent()) {
+            if (SendEvent()) {
 
-            //Dodaj ostani event do preferencji
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor editor = sp.edit();
-            editor.putInt(Const.LAST_EVENT_TYPE_ID, lastEvenTypeId);
-            editor.commit();
-        }
+                //Dodaj ostani event do preferencji
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putInt(Const.LAST_EVENT_TYPE_ID, lastEvenTypeId);
+                editor.commit();
+            }
+
     }
 
     //To umiecic w EVENT.java-nie moge bo po wykonianu  aq.ajax nie bede mial wplywu na UI, a w mainActivity jest wpylyw na modyfikacje UI
     private boolean SendEvent() {
+        //przeciwdziala kliknieciu 2x szybko na ten sam przycisk i zdublowaniu eventa do bazy
+        if(oneEventTypeAtTime == false)
+            return false;
+
+        oneEventTypeAtTime =  false;
 
         //TODO SPRAWDZIC CZY JEST polaczenie jesli nie to nie uruchamiac aq.ajax
         typeId = lastEvenTypeId;//_typeId;
@@ -383,14 +409,12 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
 
         //jesli jest ustawiona doklada lokalizacja a Internet i Lokalizacja nie zdazyly sie jeszcze uruchomic (wymaga to 1s,2s) to wyskauje okno ("grajace na czas")na wyczkanie.
         if(isBestLocationRequired()) {
-            Log.d(TAG,"first");
+//            Log.d(TAG,"first");
             //if( (!(networkInfo != null && networkInfo.isConnected())) ||  (mLastLocation == null)){
             if( mLastLocation == null){
-                Log.d(TAG, "w4");
-
-                    DialogFragment df = new EventNoReadyDialog();
-                    df.show(getFragmentManager(), "tag");
-                    return false;
+                DialogFragment df = new EventNoReadyDialog();
+                df.show(getFragmentManager(), "tag");
+                return false;
             }
         }
         if (networkInfo != null && networkInfo.isConnected()) {
@@ -439,10 +463,14 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
                         Toast.makeText(getApplicationContext(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
                     }
 
-                    saveEventToLocalDatabase(typeId,data,location,comment,isEventSend,error);
+                    saveEventToLocalDatabase(typeId, data, location, comment, isEventSend, error);
                     setButtons();
+
+                    //oneEventTypeAtTime = true;  IN viewLastEvents(); zeby nie dublowac w lini 464
                     viewLastEvents();
+//                    oneEventTypeAtTime = true;
                 }
+
             });
 
         } else {
@@ -452,6 +480,7 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
 
             setButtons();
             viewLastEvents();
+
         }
         return true;
     }
@@ -524,6 +553,19 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         adapter.notifyDataSetChanged(); //aktualizacja danych
         lv.setAdapter(adapter);
 
+        //Wył. KLAWIATURE do czasu az pole tekstownie nie zostanie wybrane    (Disabled software keyboard in android until TextEdit is chosen)
+        // hide virtual keyboard
+        etComment.setText("");
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(etComment.getWindowToken(), 0);
+        etComment.clearFocus();
+        //Fokus idzie do pierwszego z gory obiektu w lauoucie ktory moze miec focus dlatego jest dodany w linearLayout
+//        android:focusable="true"
+//        android:focusableInTouchMode="true"
+
+
+        oneEventTypeAtTime = true;
+
     }
 
     /**
@@ -554,7 +596,17 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         //setButtonVisible(btStart);
         //setButtonVisible(btFinish);
 
-        switch (lastEvenTypeId) {
+        DbAdapter dbAdapter = new DbAdapter(context);
+        Event event = dbAdapter.getLastEvent();
+
+        if(isCurrentButtonIsOk(event)){
+            session.setLastEventTypeId(event.getType());
+        }else{
+            session.setLastEventTypeId(6);
+        }
+
+
+        switch (session.getLastEventTypeId()) {
             //FINISH
             case 6:
                 btStart.setVisibility(View.VISIBLE);
@@ -833,10 +885,10 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data);
-        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
+//        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
         String txt = "";
         String s= Integer.toString(resultCode);
-        Log.d(TAG,"EVENTQ "+s);
+        Log.d(TAG, "EVENTQ " + s);
         switch (requestCode) {
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
@@ -893,7 +945,7 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
      * Starting the location updates
      */
     protected void startLocationUpdates() {
-        //Toast.makeText(getApplicationContext(),"startLocationUpdates", Toast.LENGTH_LONG).show();
+//        Toast.makeText(getApplicationContext(),"startLocationUpdates", Toast.LENGTH_LONG).show();
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
@@ -901,7 +953,7 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
      * Stopping location updates
      */
     protected void stopLocationUpdates() {
-        //Toast.makeText(getApplicationContext(),"stopLocationUpdates", Toast.LENGTH_LONG).show();
+//        Toast.makeText(getApplicationContext(),"stopLocationUpdates", Toast.LENGTH_LONG).show();
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
@@ -910,13 +962,13 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
      */
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = "+ result.getErrorCode());
-//        Toast.makeText(getApplicationContext(),"Connection failed: ConnectionResult.getErrorCode() = "+ result.getErrorCode(), Toast.LENGTH_LONG).show();
+//        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+//        Toast.makeText(getApplicationContext(),"Connection failed: ConnectionResult.getErrorCode() = "+ result.getErrorCode(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onConnected(Bundle arg0) {
-       //Toast.makeText(getApplicationContext(),"onConnection", Toast.LENGTH_LONG).show();
+//       Toast.makeText(getApplicationContext(),"onConnection", Toast.LENGTH_SHORT).show();
        startLocationUpdates();
     }
 
@@ -929,7 +981,19 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
     public void onLocationChanged(Location location) {
         // Assign the new location
         mLastLocation = location;
-//        Toast.makeText(getApplicationContext(), "Location changed!", Toast.LENGTH_SHORT).show();
+//      Toast.makeText(getApplicationContext(), "Location changed!", Toast.LENGTH_SHORT).show();
+        Address address = getAddressForLocation(context, location);
+
+        if(address instanceof Address) {
+
+            String street = getStreetNameForAddress(address);
+//          Log.d("ADDRESS", street);
+            if (street != null && !street.isEmpty() && !street.equals("null"))
+                tvAddress.setText(street);
+
+        }else {
+            tvAddress.setText(location.getLatitude()+":"+location.getLongitude());
+        }
 
     }
 
@@ -1130,5 +1194,76 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         }else{
             Toast.makeText(this,getString(R.string.synchronized_off), Toast.LENGTH_LONG).show();
         }
+    }
+
+    /**
+     * Jesli pracownik zapimni odbic wyjscie...
+     * Jesli mamy ustawiona prace w nocy  -> nie zmieniamy wyswietlania osatniego eventa
+     * Jesli mamy ustawiona prace dniowa  -> zmianiamy dostepnosc przycisku na PLAY
+     */
+    private boolean isCurrentButtonIsOk(Event event){
+
+        //Czy jest wg. event pracownika czy event jest pusty(nie ma go)
+        Log.d("BLAD",String.valueOf(event.getId()));
+        if(event.getId() != 0){
+
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+            if(sp.getBoolean("night_work",true)) {//nie wiem czemu odwrotnie
+
+                SimpleDateFormat _formatFrom = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat _formatTo = new SimpleDateFormat("yyyyMMdd");
+                String currentDate = _formatTo.format(new Date());
+
+                try {
+                    Date eventDate = _formatFrom.parse(event.getDatetime());
+                    String eventDateString = _formatTo.format(eventDate);
+
+                    if(eventDateString.compareTo(currentDate) < 0 ){
+//                        Log.d("BUTTON_", "event < now");
+                        return false;
+                    }else{
+//                        Log.d("BUTTON_", "event > now");
+                        return true;
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    return true;
+                }
+            }else{
+//                Log.d("BUTTON_", "NIGHT WORK TRUE- noc");
+                //praca nocna eventy zostaja zawsze jak sa
+                return true;
+            }
+
+        }else{
+            Log.d("BLAD", "Nie ma eventa id=0");
+            return false;
+        }
+
+    }
+
+
+    //GEOKODOWANIE GPS => ADDRESS
+    public static Address getAddressForLocation(Context context, Location location){
+        try{
+            Geocoder geocoder = new Geocoder(context);
+            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),location.getLongitude(),1);
+
+            if(addresses != null && addresses.size() > 0){
+                return addresses.get(0);
+            }else{
+                return null;
+            }
+        }catch(IOException e){
+            return null;
+        }
+    }
+
+    public String getStreetNameForAddress(Address address){
+        String streetName = address.getAddressLine(1)+", "+address.getAddressLine(0);
+        if(streetName == null){
+            streetName = address.getThoroughfare();
+        }
+        return  streetName;
     }
 }

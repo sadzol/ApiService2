@@ -28,4 +28,10 @@
         android:title="@string/settings_view_last_events"
         android:summary="@string/settings_view_last_events_desc"
         android:defaultValue="true" />
+
+    <CheckBoxPreference
+        android:key="night_work"
+        android:title="@string/night_work"
+        android:summary="@string/night_work_summary"
+        android:defaultValue="true" />
 </PreferenceScreen>

@@ -2,12 +2,12 @@ package pl.rcponline.apiservice;
 
 public class Const {
 
-//    public static final String ENIVORMENT   = "";
-  public static final String ENIVORMENT   = "/app_dev.php";
-//  public static final String MAIN_URL     = "http://panel.rcponline.pl";//
-  public static final String MAIN_URL     = "http://dev-panel.rcponline.pl";//
+    public static final String ENIVORMENT   = "";
+//  public static final String ENIVORMENT   = "/app_dev.php";
+  public static final String MAIN_URL     = "http://panel.rcponline.pl";//
+//  public static final String MAIN_URL     = "http://dev-panel.rcponline.pl";//
 //    public static final String MAIN_URL     = "http://192.168.2.102";//rcp.lh  home
-//  public static final String MAIN_URL   = "http://192.168.1.107"; //biuro
+//  public static final String MAIN_URL   = "http://192.168.8.114"; //biuro
 //  public static final String MAIN_URL   = "http://rcp.lh"; //mietka
     public static final String LOGIN_URL    = MAIN_URL+ENIVORMENT+"/api/loginApp";
     public static final String ADD_EVENT_URL  = MAIN_URL+ENIVORMENT+"/api/addEvent";
@@ -33,7 +33,7 @@ public class Const {
     
     public static final String IS_REQUIRED_LOCATION = "pl.rcponline.is_required_location";
     public static final String LAST_EVENT_TYPE_ID   = "pl.rcponline.last_event_type_id";
-
+    public static final String PREF_EMPLOYEE_LAST_EVENT_TYPE_ID = "pl.rcponline.employee_last_event_type_id";
 
     public static final Integer TIME_INTERVAL = 1000 * 60 * 2;
 

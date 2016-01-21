@@ -27,7 +27,7 @@ import java.util.List;
 
 public class DbAdapter {
 
-    private static final int DATABASE_VESRION = 5;
+    private static final int DATABASE_VESRION = 7;
     private static final String DATABASE_NAME = "Rcp.db";
     //liczba wyswietlonych ostatnich eventow
     private static final String NUMBER_LAST_EVENTS = "8";
@@ -144,7 +144,7 @@ public class DbAdapter {
         cv.put(EventsInfo.KEY_LOCATION, _event.getLocation());
         cv.put(EventsInfo.KEY_GPS, _event.getGPS());
         cv.put(EventsInfo.KEY_COMMENT,  _event.getComment());
-        cv.put(EventsInfo.KEY_STATUS,   _event.getStatus());
+        cv.put(EventsInfo.KEY_STATUS, _event.getStatus());
 
         return db.update(EventsInfo.TABLE_NAME,cv,where,null) > 0;
 
@@ -177,7 +177,31 @@ public class DbAdapter {
         c.close();
         return typeId;
     }
+    public Event getLastEvent(){
+        db = dbH.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + EventsInfo.TABLE_NAME + " ORDER BY "+ EventsInfo.KEY_DATETIME +" DESC LIMIT 0,1",null);
 
+        if(c.moveToFirst()){
+            Event event = new Event(
+                c.getInt(c.getColumnIndex(EventsInfo._ID)),
+                c.getInt(c.getColumnIndex(EventsInfo.KEY_TYPE_ID)),
+                        c.getInt(c.getColumnIndex(EventsInfo.KEY_SOURCE_ID)),
+                        c.getString(c.getColumnIndex(EventsInfo.KEY_DATETIME)),
+                        c.getString(c.getColumnIndex(EventsInfo.KEY_LOCATION)),
+                        c.getString(c.getColumnIndex(EventsInfo.KEY_GPS)),
+                        c.getString(c.getColumnIndex(EventsInfo.KEY_COMMENT)),
+                        c.getInt(c.getColumnIndex(EventsInfo.KEY_STATUS)),
+                    null);
+
+            c.close();
+            return event;
+        }else{
+            Event event = new Event();
+            return event;
+        }
+
+
+    }
     public List<Event> cursorToEvents(Cursor c){
         List<Event> events = new ArrayList<Event>();
         if(c.moveToFirst()){

@@ -39,6 +39,14 @@ public class SessionManager {
         return pref.getString(Const.PREF_PASS,"");
     }
 
+    public void setLastEventTypeId(int typeId){
+        editor.putInt(Const.PREF_EMPLOYEE_LAST_EVENT_TYPE_ID, typeId);
+        editor.apply();
+    }
+    public Integer getLastEventTypeId(){
+        return pref.getInt(Const.PREF_EMPLOYEE_LAST_EVENT_TYPE_ID, 6);
+    }
+
     public void addMessage(String message){
         editor.putString(Const.PREF_MESSAGE_AFTER_EVENT, message);
         editor.apply();

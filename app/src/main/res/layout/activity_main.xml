@@ -10,6 +10,8 @@
 
     <LinearLayout
         android:id="@+id/ll_datatime"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="0dp"
@@ -193,10 +195,24 @@
             android:textStyle="italic"
             android:singleLine="true"/>
     </LinearLayout>
-
+    <LinearLayout
+        android:id="@+id/ll_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/ll_event_comment">
+        <TextView
+            android:id="@+id/tv_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Os.700-lecia 11/11"
+            android:padding="10dp"
+            android:background="#ffffff"
+            />
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/ll_last_events"
-        android:layout_below="@+id/ll_event_comment"
+        android:layout_below="@+id/ll_address"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

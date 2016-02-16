@@ -18,9 +18,7 @@ import java.util.List;
 public class EventsAdapter2 extends ArrayAdapter<Event>{//} implements Filterable{
 
     private final String TAG = "EventAdapter2";
-    private final Object mLock = new Object();
     private final Context context;
-    //private ItemsFilter mFilter;
     public List<Event> events;
 
     public EventsAdapter2(Context context, List<Event> m_events) {
@@ -67,9 +65,14 @@ public class EventsAdapter2 extends ArrayAdapter<Event>{//} implements Filterabl
                 EventTime.setTextColor(Color.GRAY);
                 EventName.setTextColor(Color.GRAY);
                 EventDesc.setTextColor(Color.GRAY);
+            }else {
+                EventTime.setTextColor(Color.BLACK);
+                EventName.setTextColor(Color.BLACK);
+                EventDesc.setTextColor(Color.BLACK);
             }
 
             if(EventTime != null) {
+
                 //EventTime.setText(String.valueOf(e.getDatetime()));
                 EventTime.setText(getFormat(e.getDatetime()));
             }

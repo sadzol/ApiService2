@@ -3,6 +3,7 @@ package pl.rcponline.apiservice;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -22,10 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import pl.rcponline.nfc.dao.DAO;
-import pl.rcponline.nfc.dao.EventDAO;
-import pl.rcponline.nfc.utils.UtilsNet;
-import pl.rcponline.nfc.utils.UtilsThread;
+import pl.rcponline.apiservice.dao.DAO;
+import pl.rcponline.apiservice.utils.UtilsNet;
+import pl.rcponline.apiservice.utils.UtilsThread;
 
 public class SynchroService extends IntentService {
 
@@ -36,7 +36,6 @@ public class SynchroService extends IntentService {
     private String TAG = "SERWIS_AQ";
     private Context context;
     private AQuery aq;
-    private String test="test0";
     private boolean internetConnection = true; //0 = internet connection off , 1= internet connection on
 
     public SynchroService() {
@@ -53,8 +52,6 @@ public class SynchroService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         UtilsThread.logThreadSignature("SERWIS_IN_SYNCHRO_SERVICE");
-//        Log.d(TAG, test);
-        test="test1";
 
         //TODO
         //if czy jest wi-fi
@@ -117,33 +114,6 @@ public class SynchroService extends IntentService {
             LocalBroadcastManager.getInstance(this).sendBroadcast(intentLocalBroadcast);
 //        }
 
-       //-----------------------------------------------END GOOD------------
-//        Log.d("SERWIS", "--Przed wait");
-//        Log.d("SERWIS", "--" );//+ from);
-//        if(UtilsNet.isOnline()){
-//            Log.d("SERWIS","IsOnline-TRUE");
-//        }else{
-//            Log.d("SERWIS","IsOnline-FALSE");
-//        }
-//        Bundle extras = intent.getExtras();
-//        aqSynchro(extras);
-////        aqSynchro();
-//        Log.d("SERWIS", "--Po wait");
-//        long endTime = System.currentTimeMillis() + 5*1000;
-//        while (System.currentTimeMillis() < endTime) {
-//            synchronized (this) {
-//                try {
-//
-//                    Log.d("SERWIS", "--Przed wait");
-////                    Log.d("SERWIS", "--"+from);
-//                    wait(endTime - System.currentTimeMillis());
-//                    Log.d("SERWIS", "--Po wait");
-//        Toast.makeText(context,"po wait",Toast.LENGTH_SHORT).show();
-//                } catch (Exception e) {
-//                }
-//            }
-//        }
-//        Toast.makeText(context,"koniec",Toast.LENGTH_SHORT).show();
 
     }
 
@@ -174,11 +144,13 @@ public class SynchroService extends IntentService {
 
         UtilsThread.logThreadSignature(TAG);
 
-        EventDAO eventDAO = new EventDAO(context);
-        List<Event> events = eventDAO.getEventsWithStatus(0);
+        DbAdapter db = new DbAdapter(context);
+        Cursor c = db.getEventsWithStatus(0);
+        List<Event> events = db.cursorToEvents(c);
+        db.close();
+
         if(!events.isEmpty()){
                 sendingData("startSendingData");
-//            if(UtilsNet.isOnline()) {
 
                 //jeśli są to wysyłamy eventy ze statusem 0
                 Gson g = new Gson();
@@ -187,7 +159,6 @@ public class SynchroService extends IntentService {
 
                 Log.d(TAG, eventsString);//LOG
                 HashMap<String, Object> params = new HashMap<String, Object>();
-                SessionManager session = new SessionManager(context);
 
                 params.put(Const.LOGIN_API_KEY, extras.getString(Const.LOGIN_API_KEY));
                 params.put(Const.PASSWORD_API_KEY, extras.getString(Const.PASSWORD_API_KEY));
@@ -216,11 +187,11 @@ public class SynchroService extends IntentService {
                         DAO.saveAllDataFromServer(json, context);
                     } else {
                         Log.d(TAG, "success=false");
+//                        message = "Success-false - SerwerRCP: " + status.getCode() + ", " + status.getError() + ", " + json.toString() + json.optString("message");
                         message = json.optString("message");
                     }
 
                 } else {
-                    //TODO co z tymi errorami zrobic???
 
                     //Kiedy kod 500( Internal Server Error)
                     if (status.getCode() == 500) {
@@ -243,13 +214,9 @@ public class SynchroService extends IntentService {
                     Log.i(TAG, message);
                 }
 
-//            }else{
-//                Log.d(TAG, "NIE LACZY Z INTERNETEM");
-//            }
         }else{
             Log.d(TAG, "NIE MA EVENTOW DO WYSLANIA");
         }
-
 
     }
 

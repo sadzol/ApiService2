@@ -56,7 +56,7 @@ public class OnlineListener extends BroadcastReceiver {
 
             if (firstConnect) {
                 DbAdapter db = new DbAdapter(context);
-                Cursor c = db.getEventWithStatus(0);
+                Cursor c = db.getEventsWithStatus(0);
                 List<Event> events = db.cursorToEvents(c);
                 db.close();
                 //jeśli nie ma niewysłanych eventów to konczymy

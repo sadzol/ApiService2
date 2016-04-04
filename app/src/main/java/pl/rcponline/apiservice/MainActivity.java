@@ -99,7 +99,7 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
     ImageButton btStart, btFinish, btBreakStart, btBreakFinish, btTempStart, btTempFinish;
 
     ImageView imSynchro,ivStartOff,ivFinishOff,ivBreakOff,ivTempOff;
-    LinearLayout llDatatime,llLastEvent,llAddress;
+    LinearLayout llDatatime,llLastEvent;
     RelativeLayout rlBreak, rlPayExit;
     EditText etComment;
     TextView tvAddress;
@@ -127,7 +127,7 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
 
         //Ustawiamy ustawienia domyślnymi warościami z pliku prefernecji (false-tylko raz)
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        //TODO TEZ TWORZYC TU WYSYWALNIE EVENTOW JESLI MAJA STATUS 0
+        //TODO TEZ TWORZYC TU WYSYWALNIE EVENTOW JESLI MAJA STATUS 0   SYNCHRO ....
 
         //Jesli user nie zalogowany przenies do strony logowania zamykajac ta aktywnosc
         session = new SessionManager(getApplicationContext());
@@ -141,10 +141,8 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         //Wył. KLAWIATURE do czasu az pole tekstownie nie zostanie wybrane    (Disabled software keyboard in android until TextEdit is chosen)
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        ///////////LOC///////// First we need to check availability of play services
+        ///////////LOC///////// First we need to check availability of play services///////////////
         if (checkPlayServices()) {
-            //Toast.makeText(this,"IsPlayService",Toast.LENGTH_SHORT).show();
-            // Building the GoogleApi client
             Log.d(TAG,"checkPlayService - OK");
             buildGoogleApiClient();
             createLocationRequest();
@@ -152,15 +150,12 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
             Log.d(TAG,"checkPlayService - NO");
         }
         //////////////////////////////////////////////////
-        context = this;
-
-        //Polaczenie z baza
-        //dbAdapter = new DbAdapter(getApplicationContext());
+//        context = this;
 
         //Zegar w czasie rzeczywistym
-        Runnable myRunnableThread = new CountDownRunner();
-        Thread myThread = new Thread(myRunnableThread);
-        myThread.start();
+//        Runnable myRunnableThread = new CountDownRunner();
+//        Thread myThread = new Thread(myRunnableThread);
+//        myThread.start();
 
         //AQuery
         aq = new AQuery(getApplicationContext());
@@ -177,12 +172,6 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         ivFinishOff= (ImageView) findViewById(R.id.iv_finish_off);
         ivBreakOff = (ImageView) findViewById(R.id.iv_break_off);
         ivTempOff  = (ImageView) findViewById(R.id.iv_temp_off);
-//        btStart = (Button) findViewById(R.id.bt_start);
-//        btFinish = (Button) findViewById(R.id.bt_finish);
-//        btBreakStart = (Button) findViewById(R.id.bt_break_start);
-//        btBreakFinish = (Button) findViewById(R.id.bt_break_finish);
-//        btTempStart = (Button) findViewById(R.id.bt_temp_start);
-//        btTempFinish = (Button) findViewById(R.id.bt_temp_finish);
         llDatatime = (LinearLayout)findViewById(R.id.ll_datatime);
         imSynchro = (ImageView) findViewById(R.id.im_synchronized);
 
@@ -203,7 +192,7 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         imSynchro.setOnClickListener(this);
 
         lastEvenTypeId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getInt(Const.LAST_EVENT_TYPE_ID, 6);
-        Log.i(TAG, Integer.toString(lastEvenTypeId));
+//        Log.i(TAG, Integer.toString(lastEvenTypeId));
 
         //progres bar w przypadku zwiekszenia dokladnosci lokalizacji zeby miec czas na wyszukanie polozenia i zlapanie sieci wi-fi
         pd = new ProgressDialog(new ContextThemeWrapper(this, android.R.style.Theme_Holo_Dialog));
@@ -216,7 +205,6 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
 
     @Override
     protected void onStart() {
-
         super.onStart();
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
@@ -227,7 +215,6 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
     @Override
     protected void onStop() {
         super.onStop();
-
         if (mGoogleApiClient.isConnected()) {
             stopLocationUpdates();
             mGoogleApiClient.disconnect();
@@ -240,16 +227,13 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        //checkPlayServices();
 
         // Resuming the periodic location updates
         if (mGoogleApiClient.isConnected()){
-            //Toast.makeText(this,"StartLocationUpdates",Toast.LENGTH_SHORT).show();
             startLocationUpdates();
         }else{
             //Toast.makeText(this,"NOstartLocationUpdates",Toast.LENGTH_SHORT).show();
         }
-        //locManager.requestLocationUpdates(locProvider, Const.TIME_INTERVAL, 2, locRcp);
         //todo ustawic przyciski i odswiezyc eventy
         setButtons();
         viewLastEvents();
@@ -329,48 +313,36 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
 
     @Override
     public void onClick(View v) {
-        lasViewEvent = v;
+
         if(v.getId() == R.id.im_synchronized){
             Log.d(TAG,"in");
             synchronizedWithServer();
 
         }else if(isBestLocationRequired()){
             viewDialogLocation();
+
         }else {
-            startEvent();
-        }
-
-
-    }
-    private void startEvent(){
-        View v = lasViewEvent;
-        switch (v.getId()) {
-            case R.id.bt_start:
-                lastEvenTypeId = 1;
-                //SendEvent(1);
-                break;
-            case R.id.bt_finish:
-                lastEvenTypeId = 6;
-                //SendEvent(6);
-                break;
-            case R.id.bt_break_start:
-                lastEvenTypeId = 2;
-                //SendEvent(2);
-                break;
-            case R.id.bt_break_finish:
-                lastEvenTypeId = 3;
-                //SendEvent(3);
-                break;
-            case R.id.bt_temp_start:
-                lastEvenTypeId = 4;
-                //SendEvent(4);
-                break;
-            case R.id.bt_temp_finish:
-                lastEvenTypeId = 5;
-                //SendEvent(5);
-                break;
-        }
-        Log.d(TAG, "EVENTQ " + lastEvenTypeId);
+            switch (v.getId()) {
+                case R.id.bt_start:
+                    lastEvenTypeId = 1;
+                    break;
+                case R.id.bt_finish:
+                    lastEvenTypeId = 6;
+                    break;
+                case R.id.bt_break_start:
+                    lastEvenTypeId = 2;
+                    break;
+                case R.id.bt_break_finish:
+                    lastEvenTypeId = 3;
+                    break;
+                case R.id.bt_temp_start:
+                    lastEvenTypeId = 4;
+                    break;
+                case R.id.bt_temp_finish:
+                    lastEvenTypeId = 5;
+                    break;
+            }
+            Log.d(TAG, "EVENTQ " + lastEvenTypeId);
 
             if (SendEvent()) {
 
@@ -380,8 +352,10 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
                 editor.putInt(Const.LAST_EVENT_TYPE_ID, lastEvenTypeId);
                 editor.commit();
             }
+        }
 
     }
+
 
     //To umiecic w EVENT.java-nie moge bo po wykonianu  aq.ajax nie bede mial wplywu na UI, a w mainActivity jest wpylyw na modyfikacje UI
     private boolean SendEvent() {
@@ -549,7 +523,7 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
 
         //Dodaje adapter do ListView
         ListView lv = (ListView) findViewById(R.id.lv_last_events);
-        EventsAdapter2 adapter = new EventsAdapter2(this, lastEvents);
+        EventsAdapter adapter = new EventsAdapter(this, lastEvents);
         adapter.notifyDataSetChanged(); //aktualizacja danych
         lv.setAdapter(adapter);
 
@@ -1062,7 +1036,7 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
         if(cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected()) {
 
             DbAdapter db = new DbAdapter(context);
-            Cursor c = db.getEventWithStatus(0);
+            Cursor c = db.getEventsWithStatus(0);
 
             List<Event> events = db.cursorToEvents(c);
             db.close();
@@ -1163,7 +1137,7 @@ public class MainActivity extends Activity implements View.OnClickListener,Conne
 
                     } else {
 
-                        //TODO co z tymi errorami zrobic???
+
                         //Kiedy kod 500( Internal Server Error)
                         if (status.getCode() == 500) {
                             message = context.getString(R.string.error_500);

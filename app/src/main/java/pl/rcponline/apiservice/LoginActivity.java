@@ -27,8 +27,7 @@ import pl.rcponline.apiservice.dao.DAO;
 public class LoginActivity extends Activity {
 
     EditText etLogin,etPassword;
-    private final String TAG = "LOGIN";
-    AQuery aq;
+    private final String TAG = "LOGIN_ACTIVITY";
     SessionManager session;
 
     @Override
@@ -38,12 +37,9 @@ public class LoginActivity extends Activity {
 
         session = new SessionManager(getApplicationContext());
 
-        aq = new AQuery(this);
         etLogin     = (EditText) findViewById(R.id.et_log);
         etPassword  = (EditText) findViewById(R.id.et_password);
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -74,6 +70,7 @@ public class LoginActivity extends Activity {
         dialog.setCanceledOnTouchOutside(true);
         dialog.setMessage(getString(R.string.login));
 
+        AQuery aq = new AQuery(getApplicationContext());
         aq.progress(dialog).ajax(url,params, JSONObject.class,new AjaxCallback<JSONObject>(){
 
             @Override
@@ -81,9 +78,11 @@ public class LoginActivity extends Activity {
                     if(json != null){
                         Log.d(TAG,"JSON NO NULL");
                         if(json.optBoolean("success") == true){
-                            Log.d(TAG,"success");
 
+                            Log.d(TAG, "Success Login: "+login+":"+password);
+                            SessionManager session = new SessionManager(getApplicationContext());
                             session.createSession(login, password);
+
                             DAO.saveLastEventsFromServer(json,getApplicationContext());
                             /*SharedPreferences sh = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                             SharedPreferences.Editor editor = sh.edit();
@@ -102,17 +101,29 @@ public class LoginActivity extends Activity {
                             Toast.makeText(getApplicationContext(), getString(R.string.bad_login_or_pass), Toast.LENGTH_LONG).show();
                         }
 
-                        //Toast.makeText(getApplicationContext(), status.getCode() + ":" + json.optString("user"), Toast.LENGTH_LONG).show();
                     }else{
                         Log.d(TAG,"JSON IS NULL");
                         String error;
-//                        Toast.makeText(getApplicationContext(),String.valueOf(status.getCode())).show();
-                        if(status.getCode() == -101 ){
+                        //Kiedy kod 500( Internal Server Error)
+                        if (status.getCode() == 500) {
+                            error = getString(R.string.error_500);
+
+                            //Błąd 404 (Not found)
+                        } else if (status.getCode() == 404) {
+                            error = getString(R.string.error_404);
+
+                            //Blad -101 Moze oznaczac: Serwer nie odpowiada
+                        } else if(status.getCode() == -101 ){
                             error = getString(R.string.error_offline);
+
+                            //500 lub 404
                         }else{
                             error = getString(R.string.error_unexpected);
                         }
-                        Toast.makeText(getApplicationContext(),error,Toast.LENGTH_LONG).show();
+                        Log.d(TAG, error);
+
+                        Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG).show();
+
                     }
 
                 DbAdapter db3 = new DbAdapter(getApplicationContext());

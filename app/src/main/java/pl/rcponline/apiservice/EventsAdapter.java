@@ -15,13 +15,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class EventsAdapter2 extends ArrayAdapter<Event>{//} implements Filterable{
+public class EventsAdapter extends ArrayAdapter<Event>{//} implements Filterable{
 
-    private final String TAG = "EventAdapter2";
+    private final String TAG = "EventAdapter";
     private final Context context;
     public List<Event> events;
 
-    public EventsAdapter2(Context context, List<Event> m_events) {
+    public EventsAdapter(Context context, List<Event> m_events) {
         super(context, 0, m_events);
         this.events = m_events;
         this.context=context;
@@ -72,22 +72,9 @@ public class EventsAdapter2 extends ArrayAdapter<Event>{//} implements Filterabl
             }
 
             if(EventTime != null) {
-
-                //EventTime.setText(String.valueOf(e.getDatetime()));
                 EventTime.setText(getFormat(e.getDatetime()));
             }
             if(EventName != null) {
-                //Tłumacznie ze stringa na resurce value
-                //  Log.d(TAG,e.getTypeName());
-//                int layoutID = getResources().getIdentifier("layout"+n, "id", getPackageName());
-//            return (LinearLayout)findViewById(layoutID);
-
-//                int eventIdName = getContext().getResources().getIdentifier("R.string."+e.getTypeName(),"string",getContext().getPackageName());
-//            int eventIdName;
-//            EventName.setText(getContext().getString(eventIdName));
-
-//                Log.d(TAG,getContext().getString(Integer.parseInt(eventName)) );
-                //Log.d(TAG, getContext().getString(getContext().getResources().getIdentifier(String.valueOf(e.getTypeName()), "string", Const.PACKAGE)));
                 EventName.setText(getContext().getString(getContext().getResources().getIdentifier(String.valueOf(e.getTypeName()), "string", getContext().getPackageName())));
             }
             if(EventDesc != null){

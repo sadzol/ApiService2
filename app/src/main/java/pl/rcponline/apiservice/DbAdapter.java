@@ -27,11 +27,12 @@ import java.util.List;
 
 public class DbAdapter {
 
+    private final String TAG = "DATABASE";
     private static final int DATABASE_VESRION = 7;
     private static final String DATABASE_NAME = "Rcp.db";
+
     //liczba wyswietlonych ostatnich eventow
     private static final String NUMBER_LAST_EVENTS = "8";
-    private final String TAG = "DATABASE";
 
     //zmienna do przechowywania bazy
     private SQLiteDatabase db;
@@ -69,13 +70,6 @@ public class DbAdapter {
                 EventsInfo.KEY_STATUS   +   " INTEGER DEFAULT 0);";
 
     private static final String DELETE_TABLE = "DROP TABLE IF EXISTS "+ EventsInfo.TABLE_NAME;
-
-    //Otwieramy polaczenie z baza
-    /*public DbAdapter open(){
-        db = dbH.getWritableDatabase();
-        return this;
-    }*/
-
 
     //Zamykamy polaczenie z baza
     public void close(){
@@ -150,7 +144,7 @@ public class DbAdapter {
 
     }
 
-    public Cursor getEventWithStatus(int status) {
+    public Cursor getEventsWithStatus(int status) {
 
         db = dbH.getReadableDatabase();
         //List<Event> events = new ArrayList<Event>();

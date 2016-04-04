@@ -62,7 +62,7 @@ public class DAO {
         } catch (JSONException e1) {
             e1.printStackTrace();
             message = "Blad w przetwarzaniu JSON";
-            Toast.makeText(context,message,Toast.LENGTH_SHORT);
+//            Log.d(TAG,message);
             //TODO co z tymi informacjami ERORRAMI zrobic???
         }
 

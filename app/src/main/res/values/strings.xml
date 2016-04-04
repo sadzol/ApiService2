@@ -43,6 +43,7 @@
     <string name="bad_login_or_pass">Nieprawidłowy login lub hasło</string>
     <string name="error_unexpected">Błąd: Wystąpił nieoczekiwany błąd</string>
     <string name="error_500">Błąd 500: Serwer zajęty lub wyłączony</string>
+    <string name="error_405">Błąd 405: Problem z siecią, możliwe zrywane połączenie</string>
     <string name="error_404">Błąd 404: Brak połączenia z serwerem</string>
     <string name="error_offline">Nie można się zalogować - sprawdź połączenie internetowe</string>
     <string name="location_disabled">Brak informacji - wyłączona opcja lokalizacji w urządzeniu</string>

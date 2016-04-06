@@ -6,15 +6,6 @@ public class Event {
     private String location, gps, comment, datetime, error;
 
     public Event(){}
-//
-//    public Event(int typeId, int _sourceId, String _datetime, String _location, String _comment){
-//
-//        this.type = typeId;
-//        source = _sourceId;
-//        datetime = _datetime;
-//        location = _location;
-//        comment = _comment;
-//    }
 
     public Event(int _id, int typeId, int _sourceId, String _datetime, String _location, String _gps, String _comment, int _status, String _error){
 

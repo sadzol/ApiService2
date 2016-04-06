@@ -143,6 +143,14 @@ public class DbAdapter {
         return db.update(EventsInfo.TABLE_NAME,cv,where,null) > 0;
 
     }
+    public long updateEventStatus(long eventId, int status){
+
+        ContentValues values = new ContentValues();
+        values.put(EventsInfo.KEY_STATUS, status);
+
+        long result = db.update(EventsInfo.TABLE_NAME, values, EventsInfo._ID + " = " + eventId, null);
+        return  result;
+    }
 
     public Cursor getEventsWithStatus(int status) {
 

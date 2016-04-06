@@ -5,7 +5,7 @@
 
     android:layout_gravity="center_vertical"
     android:background="@drawable/login_background_gradient"
-    tools:context="pl.rcponline.api.MainActivity">
+    tools:context="pl.rcponline.apiservice.MainActivity">
 
 
     <LinearLayout
@@ -35,7 +35,19 @@
             android:src="@drawable/ic_action_time"
             android:visibility="gone"/>
 
-        <TextView
+<!--            <TextClock
+                android:id="@+id/tv_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="15dp"
+                android:paddingRight="10dp"
+                android:textColor="#FFF"
+                android:textSize="@dimen/clock_text"
+                android:textStyle="bold"
+                tools:text="12:30"
+                android:format24Hour="k:mm"
+                />-->
+  <!--      <TextView
             android:id="@+id/tv_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -46,17 +58,19 @@
             android:textSize="@dimen/clock_text"
             android:textStyle="bold"
             tools:text="12:22:11"
-            />
-            <!--<DigitalClock-->
-                <!--android:id="@+id/digitalClock"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:textSize="@dimen/activity_event_tv_time"-->
-                <!--android:paddingLeft="15dp"-->
-                <!--android:paddingRight="10dp"-->
-                <!--android:textColor="#FFF"-->
-                <!--android:textStyle="bold"-->
-                <!--/>-->
+            />-->
+            <DigitalClock
+                android:id="@+id/tv_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="15dp"
+                android:paddingRight="10dp"
+                android:textColor="#FFF"
+                android:textSize="@dimen/clock_text"
+                android:textStyle="bold"
+                tools:text="12:30"
+                android:format24Hour="k:mm"
+                />
         </LinearLayout>
 
         <ImageView
@@ -64,9 +78,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="right"
+            android:layout_marginRight="10dp"
             android:src="@drawable/ic_action_refresh"
             />
-
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:visibility="gone"
+            android:layout_marginRight="10dp"
+            android:gravity="right" />
     </LinearLayout>
     <!--<ProgressBar-->
         <!--android:id="@+id/progressBar1"-->

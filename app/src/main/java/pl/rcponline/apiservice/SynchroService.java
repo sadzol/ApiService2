@@ -16,14 +16,18 @@ import com.androidquery.callback.AjaxStatus;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
+import java.sql.BatchUpdateException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import pl.rcponline.apiservice.dao.DAO;
+import pl.rcponline.apiservice.eventbus.BusSendingData;
+import pl.rcponline.apiservice.eventbus.BusSynchro;
 import pl.rcponline.apiservice.utils.UtilsNet;
 import pl.rcponline.apiservice.utils.UtilsThread;
 
@@ -36,16 +40,13 @@ public class SynchroService extends IntentService {
     private String TAG = "SERWIS_AQ";
     private Context context;
     private AQuery aq;
-    private boolean internetConnection = true; //0 = internet connection off , 1= internet connection on
 
     public SynchroService() {
         super("SynchroService");
-        this.context = this;
 
+        this.context = this;
         aq = new AQuery(context);
 
-        //bez ponownego dastarczania intencji w razie rozlaczenia
-//        setIntentRedelivery(false);
         UtilsThread.logThreadSignature("SERWIS_CONSTRUCTOR");
     }
 
@@ -53,81 +54,72 @@ public class SynchroService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         UtilsThread.logThreadSignature("SERWIS_IN_SYNCHRO_SERVICE");
 
-        //TODO
-        //if czy jest wi-fi
-        //if synchro czy dodanie eventa
-        //w srodku wybrnej operacji.. spr czy isOnline
-        //if isOnline true => operacja wybrana
-
-        //--------GOOD----------
         String message = null;
+        String type = "";
+        String error = null;
+        Bundle extras =  intent.getExtras();
+        String from = extras.getString("from");
+        if(from.equals("synchro")){
+            String synchroType = extras.getString("synchroType","auto");
+            if(synchroType.equals("manual")){
+                type = "synchroManual";
+            }else if(synchroType.equals("auto")){
+                type = "synchroAuto";
+            }
+        }
+
         if(isNetworkOn(context)){
             Log.d(TAG, "Network Local - ON");
 
-            if(UtilsNet.isOnline(this)) {
-                internetConnection = true;
-                Log.d(TAG, "Internet - ON");
+/*
+            if(type.equals("synchroManual")){
+                EventBus.getDefault().post(new BusSendingData("startSendingData"));
+            }
+*/
 
-                Bundle extras = intent.getExtras();
-                String from = extras.getString("from");
+            if (from.equals("synchro")) {
+                String synchroType = extras.getString("synchroType","auto");
+                DbAdapter db = new DbAdapter(context);
+                Cursor c = db.getEventsWithStatus(0);
+                List<Event> events = db.cursorToEvents(c);
+                db.close();
 
-                if(from.equals("synchro")){
+                Log.d(TAG+"_SYNCHRO_TYPE",String.valueOf(synchroType));
+
+                //Reczne synchronizuje-sciaga z serwera mimo ze nie ma nic do wyslania
+                if(synchroType.equals("manual")){
+                    EventBus.getDefault().post(new BusSendingData("startSendingData"));
+                    aqSynchro(extras,events);
+
+                    //Nie synchronizuje nie sciaga z serwera jesli nie ma nic do wyslania oszczzedzanie-optymalizacja
+                }else{
+
                     //isOnine sprawdzamy po sprawdzeniu czy sa eventy 0
-                    aqSynchro(extras);
-
-                }else if(from.equals("event")){
-                    message = aqAddEvent(extras);
+                    if(!events.isEmpty()){
+                        aqSynchro(extras,events);
+                    }else{
+                        Log.d(TAG, "NIE MA EVENTOW DO WYSLANIA");
+                    }
                 }
 
-            }else{
-                message = "Internet - OFF";
-                Log.d(TAG, "Internet - OFF");
-                internetConnection = false;
+            } else if (from.equals("event")) {
+                error = aqAddEvent(extras);
+                //PO EventBus juz sie nic nie wykonuje
+                EventBus.getDefault().post(new BusSynchro("event", error));
             }
-
-//            Bundle extras = intent.getExtras();
-//            String from = extras.getString("from");
-//
-//            if(from.equals("synchro")){
-//                //isOnine sprawdzamy po sprawdzeniu czy sa eventy 0
-//                aqSynchro(extras);
-//
-//            }else if(from.equals("event")){
-//                if(UtilsNet.isOnline()) {
-//                    message = aqAddEvent(extras);
-//                }else{
-//                    message = "Internet - OFF";
-//                }
-//            }
 
         }else{
             Log.d(TAG, "Network (WIFI/GSM) - OFF");
-            message = "Network (WIFI/GSM) - OFF";
+            error = "Network (WIFI/GSM) - OFF";
         }
         Log.d(TAG, String.valueOf(message));
-
-//        if(message != null) {
-            Intent intentLocalBroadcast = new Intent("localBroadcast");
-            intentLocalBroadcast.putExtra("type", "event");
-            intentLocalBroadcast.putExtra("message", message);
-            intentLocalBroadcast.putExtra("internetConncection",internetConnection);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intentLocalBroadcast);
-//        }
-
-
+        EventBus.getDefault().post(new BusSynchro(type, error));
     }
 
-    ////2 types : startSendingData and endSendingData
-    private void sendingData(String typeSendingData){
-
-        Intent intentLocalBroadcast = new Intent("localBroadcast");
-        intentLocalBroadcast.putExtra("type", typeSendingData);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intentLocalBroadcast);
-    }
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-        sendingData("endSendingData");
+        EventBus.getDefault().post(new BusSendingData("endSendingData"));
         super.onDestroy();
     }
 
@@ -140,88 +132,74 @@ public class SynchroService extends IntentService {
         return (netInfo != null && netInfo.isConnected());
 
     }
-    private void aqSynchro(Bundle extras){
+    private void aqSynchro(Bundle extras, List<Event> events){
 
         UtilsThread.logThreadSignature(TAG);
 
-        DbAdapter db = new DbAdapter(context);
-        Cursor c = db.getEventsWithStatus(0);
-        List<Event> events = db.cursorToEvents(c);
-        db.close();
+        //jeśli są to wysyłamy eventy ze statusem 0
+        Gson g = new Gson();
+        Type type = new TypeToken<List<Event>>() {}.getType();
+        String eventsString = g.toJson(events, type);
 
-        if(!events.isEmpty()){
-                sendingData("startSendingData");
+        Log.d(TAG, eventsString);//LOG
+        HashMap<String, Object> params = new HashMap<String, Object>();
 
-                //jeśli są to wysyłamy eventy ze statusem 0
-                Gson g = new Gson();
-                Type type = new TypeToken<List<Event>>() {}.getType();
-                String eventsString = g.toJson(events, type);
+        params.put(Const.LOGIN_API_KEY, extras.getString(Const.LOGIN_API_KEY));
+        params.put(Const.PASSWORD_API_KEY, extras.getString(Const.PASSWORD_API_KEY));
+        params.put(Const.EVENTS_API_KEY, eventsString);
+        Log.d(TAG, params.toString());//LOG
 
-                Log.d(TAG, eventsString);//LOG
-                HashMap<String, Object> params = new HashMap<String, Object>();
+        String url = Const.ADD_EVENTS_URL;
+        //AQUERY
+        AjaxCallback cb = new AjaxCallback();
+        cb.url(url);
+        cb.type(JSONObject.class);
+        cb.params(params);
+        aq.sync(cb);
 
-                params.put(Const.LOGIN_API_KEY, extras.getString(Const.LOGIN_API_KEY));
-                params.put(Const.PASSWORD_API_KEY, extras.getString(Const.PASSWORD_API_KEY));
-                params.put(Const.EVENTS_API_KEY, eventsString);
-                Log.d(TAG, params.toString());//LOG
+        JSONObject json = (JSONObject) cb.getResult();
+        AjaxStatus status = cb.getStatus();
 
-                String url = Const.ADD_EVENTS_URL;
-                //AQUERY
-                AjaxCallback cb = new AjaxCallback();
-                cb.url(url);
-                cb.type(JSONObject.class);
-                cb.params(params);
-                aq.sync(cb);
+        Log.d("SERWIS_CODE", String.valueOf(status.getCode()));
+        Log.d("SERWIS_WYNIK", String.valueOf(json));
 
-                JSONObject json = (JSONObject) cb.getResult();
-                AjaxStatus status = cb.getStatus();
+        //END AQUERY
+        String message = "";
+        if (json != null) {
+            if (json.optBoolean("success") == true) {
+                Log.d(TAG, "success=true");
+                DAO.saveLastEventsFromServer(json, context);
+            } else {
+                Log.d(TAG, "success=false");
+                message = json.optString("message");
+            }
 
-                Log.d("SERWIS_CODE", String.valueOf(status.getCode()));
-                Log.d("SERWIS_WYNIK", String.valueOf(json));
+        } else {
 
-                //END AQUERY
-                String message = "";
-                if (json != null) {
-                    if (json.optBoolean("success") == true) {
-                        Log.d(TAG, "success=true");
-                        DAO.saveAllDataFromServer(json, context);
-                    } else {
-                        Log.d(TAG, "success=false");
-//                        message = "Success-false - SerwerRCP: " + status.getCode() + ", " + status.getError() + ", " + json.toString() + json.optString("message");
-                        message = json.optString("message");
-                    }
+            //Kiedy kod 500( Internal Server Error)
+            if (status.getCode() == 500) {
+                message = context.getString(R.string.error_500);
 
-                } else {
+                //Błąd 405 (Cycle Network)
+            } else if (status.getCode() == 405) {
+                message = context.getString(R.string.error_405);
 
-                    //Kiedy kod 500( Internal Server Error)
-                    if (status.getCode() == 500) {
-                        message = context.getString(R.string.error_500);
+                //Błąd 404 (Not found)
+            } else if (status.getCode() == 404) {
+                message = context.getString(R.string.error_404);
 
-                    //Błąd 405 (Cycle Network)
-                    } else if (status.getCode() == 405){
-                        message = context.getString(R.string.error_405);
-
-                        //Błąd 404 (Not found)
-                    } else if (status.getCode() == 404) {
-                        message = context.getString(R.string.error_404);
-
-                        //500 lub 404
-                    } else {
-                        message = context.getString(R.string.error_unexpected);
-                    }
-                }
-                if (message != "") {
-                    Log.i(TAG, message);
-                }
-
-        }else{
-            Log.d(TAG, "NIE MA EVENTOW DO WYSLANIA");
+                //500 lub 404
+            } else {
+                message = context.getString(R.string.error_unexpected);
+            }
+        }
+        if (message != "") {
+            Log.i(TAG, message);
         }
 
     }
 
     private String aqAddEvent(Bundle extras){
-        sendingData("startSendingData");
 
         String TAG = "SERWIS_ADD_EVENT";
         UtilsThread.logThreadSignature(TAG);
@@ -233,11 +211,12 @@ public class SynchroService extends IntentService {
         params.put(Const.SOURCE_ID_API_KEY, extras.getInt(Const.SOURCE_ID_API_KEY));
         params.put(Const.DATATIME_API_KEY, extras.getString(Const.DATATIME_API_KEY));
         params.put(Const.LOCATION_API_KEY, extras.getString(Const.LOCATION_API_KEY));
+        params.put(Const.GPS_API_KEY,extras.getString(Const.GPS_API_KEY));
         params.put(Const.COMMENT_API_KEY, extras.getString(Const.COMMENT_API_KEY));
 
-        params.put(Const.IDENTIFICATOR_API_KEY, extras.getString(Const.IDENTIFICATOR_API_KEY));
-        params.put(Const.EMPLOYEE_ID_API_KEY, extras.getLong(Const.EMPLOYEE_ID_API_KEY));
-        params.put(Const.DEVICE_CODE_API_KEY, extras.getString(Const.DEVICE_CODE_API_KEY));
+//        params.put(Const.IDENTIFICATOR_API_KEY, extras.getString(Const.IDENTIFICATOR_API_KEY));
+//        params.put(Const.EMPLOYEE_ID_API_KEY, extras.getLong(Const.EMPLOYEE_ID_API_KEY));
+//        params.put(Const.DEVICE_CODE_API_KEY, extras.getString(Const.DEVICE_CODE_API_KEY));
 
         long lastAddedEventId =  extras.getLong(Const.LAST_ADDED_EVENT_ID);
 
@@ -249,9 +228,10 @@ public class SynchroService extends IntentService {
                 + ", sourceId=" + extras.getInt(Const.SOURCE_ID_API_KEY)
                 + ", datatime=" + extras.getString(Const.DATATIME_API_KEY)
                 + ", location=" + extras.getString(Const.LOCATION_API_KEY)
-                + ", id=" + extras.getString(Const.IDENTIFICATOR_API_KEY)
-                + ", employeeId=" + extras.getLong(Const.EMPLOYEE_ID_API_KEY)
-                + ", device_code=" + extras.getString(Const.DEVICE_CODE_API_KEY));
+                + ", gps=" + extras.getString(Const.GPS_API_KEY)
+                + ", id=" + extras.getString(Const.IDENTIFICATOR_API_KEY));
+//                + ", employeeId=" + extras.getLong(Const.EMPLOYEE_ID_API_KEY)
+//                + ", device_code=" + extras.getString(Const.DEVICE_CODE_API_KEY));
 
         //TODO wysylane zdarzen 0 przed logowaniem zeby ich nie stracic its nesessery?
         AjaxCallback cb = new AjaxCallback();
@@ -273,9 +253,9 @@ public class SynchroService extends IntentService {
                 Log.i(TAG, "Succes-true");
 
                 int isEventSend = 1;
-                EventDAO eventDAO = new EventDAO(context);
-                eventDAO.updateEventStatus(lastAddedEventId, isEventSend);
-
+                DbAdapter db = new DbAdapter(context);
+                db.updateEventStatus(lastAddedEventId, isEventSend);
+                db.close();
                 //message = "suc" + status.getCode() + json.toString() + json.optString("message");
 
             } else {

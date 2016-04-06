@@ -2,7 +2,7 @@ package pl.rcponline.apiservice;
 
 public class Const {
 
-    public  static final Boolean DEVELOPER_MODE = false;
+    public  static final Boolean DEVELOPER_MODE = true;
     public static final String ENIVORMENT   = "";
 //  public static final String ENIVORMENT   = "/app_dev.php";
 //  public static final String MAIN_URL     = "http://panel.rcponline.pl";//
@@ -25,6 +25,10 @@ public class Const {
     public static final String GPS_API_KEY      = "gps";
     public static final String COMMENT_API_KEY  = "comment";
     public static final String EVENTS_API_KEY   = "events";
+    public static final String EMPLOYEE_ID_API_KEY  = "employee_id";
+    public static final String IDENTIFICATOR_API_KEY= "identificator";
+    public static final String DEVICE_CODE_API_KEY  = "device_code";
+    public static final String LAST_ADDED_EVENT_ID  = "last_added_event_id";
 
     public static final Integer SOURCE_ID   = 6;//application-smartphone
     public static final String PREF_LOGIN   = "pl.rcponline.login";

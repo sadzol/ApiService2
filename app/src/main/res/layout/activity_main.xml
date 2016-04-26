@@ -59,7 +59,7 @@
             android:textStyle="bold"
             tools:text="12:22:11"
             />-->
-            <DigitalClock
+            <TextClock
                 android:id="@+id/tv_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

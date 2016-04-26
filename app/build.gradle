@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 
+
 android {
     compileOptions{
         encoding "UTF-8"
@@ -9,11 +10,11 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
     defaultConfig {
-        applicationId "pl.rcponline.location"
-        minSdkVersion 16
+        applicationId "pl.rcponline.apiservice"
+        minSdkVersion 17
         targetSdkVersion 23
         versionCode 25
-        versionName "1.14"
+        versionName "1.15"
     }
     buildTypes {
         release {
@@ -39,5 +40,5 @@ dependencies {
 }
 
 
-
+apply plugin: 'com.google.gms.google-services'
 

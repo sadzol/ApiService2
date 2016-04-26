@@ -38,6 +38,12 @@ public class SessionManager {
     public String getPassword(){
         return pref.getString(Const.PREF_PASS,"");
     }
+    public Boolean isButtonLock() { return pref.getBoolean(Const.PREF_IS_BUTTON_LOCK,false); }
+
+    public void setIsButtonLock(boolean isButtonLock){
+        editor.putBoolean(Const.PREF_IS_BUTTON_LOCK, isButtonLock);
+        editor.apply();
+    }
 
     public void setLastEventTypeId(int typeId){
         editor.putInt(Const.PREF_EMPLOYEE_LAST_EVENT_TYPE_ID, typeId);

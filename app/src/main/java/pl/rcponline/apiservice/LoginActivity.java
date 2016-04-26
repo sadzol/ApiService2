@@ -43,7 +43,6 @@ public class LoginActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.login, menu);
         return true;
     }
@@ -54,14 +53,14 @@ public class LoginActivity extends Activity {
     }
 
     public void signUp(View view) {
-        Log.d(TAG, "In");
-        final String login = etLogin.getText().toString().trim();
-        final String password = etPassword.getText().toString().trim();
+        final String login = etLogin.getText().toString().trim().replace(" ","");
+        final String password = etPassword.getText().toString().trim().replace(" ","");
         String url = Const.LOGIN_URL;
 
         Map<String,Object> params = new HashMap<String,Object>();
         params.put(Const.LOGIN_API_KEY,login);
         params.put(Const.PASSWORD_API_KEY,password);
+        Log.d(TAG, "Send Login: "+login+":"+password);
 
         ProgressDialog dialog = new ProgressDialog(this,ProgressDialog.THEME_HOLO_DARK);
         dialog.setIndeterminate(true);
@@ -84,14 +83,7 @@ public class LoginActivity extends Activity {
                             session.createSession(login, password);
 
                             DAO.saveLastEventsFromServer(json,getApplicationContext());
-                            /*SharedPreferences sh = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                            SharedPreferences.Editor editor = sh.edit();
-                            editor.putString(Const.PREF_LOGIN, login );
-                            editor.putString(Const.PREF_PASS, password);
-                            //editor.putString(Const.IS_REQUIRED_LOCATION);
-                            editor.commit();
 
-                            setResult(RESULT_OK);*/
                             Intent intent = new Intent(LoginActivity.this,MainActivity.class);
                             startActivity(intent);
                             finish();

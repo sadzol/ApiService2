@@ -7,8 +7,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
@@ -54,12 +54,13 @@
 
         </activity>
 
-        <receiver android:name=".OnlineListener">
+        <service android:name=".SynchroService" />
+<!--        <receiver android:name=".OnlineListener">
             <intent-filter>
-                <!--<action android:name="android.net.wifi.STATE_CHANGE" />-->
+                &lt;!&ndash;<action android:name="android.net.wifi.STATE_CHANGE" />&ndash;&gt;
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
-        </receiver>
+        </receiver>-->
 
     </application>
 </manifest>

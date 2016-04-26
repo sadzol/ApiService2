@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.androidquery.AQuery;
@@ -20,15 +19,12 @@ import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
-import java.sql.BatchUpdateException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import pl.rcponline.apiservice.dao.DAO;
 import pl.rcponline.apiservice.eventbus.BusSendingData;
-import pl.rcponline.apiservice.eventbus.BusSynchro;
-import pl.rcponline.apiservice.utils.UtilsNet;
 import pl.rcponline.apiservice.utils.UtilsThread;
 
 public class SynchroService extends IntentService {
@@ -37,7 +33,7 @@ public class SynchroService extends IntentService {
     //TODO !!! ALE jezeli wywolamy serwis a w tym czasie juz ten serwis dziala(pracuje w tle) tworzy sie kolejka i jest ona wykonywana w tym samym WATKU ! zmienne ani KONSTRUKTOR sie nie resetuja/wykonuja
     //TODO DZIALAMY na tym SAMYM OBIEKCIE !   trzeba by nadpisac funkcje onStartCommand
 
-    private String TAG = "SERWIS_AQ";
+    private String TAG = "SERWIS_SS";
     private Context context;
     private AQuery aq;
 
@@ -67,7 +63,7 @@ public class SynchroService extends IntentService {
                 type = "synchroAuto";
             }
         }
-
+        Log.d(TAG,type);
         if(isNetworkOn(context)){
             Log.d(TAG, "Network Local - ON");
 
@@ -103,9 +99,10 @@ public class SynchroService extends IntentService {
                 }
 
             } else if (from.equals("event")) {
+                EventBus.getDefault().post(new BusSendingData("startSendingData"));
                 error = aqAddEvent(extras);
                 //PO EventBus juz sie nic nie wykonuje
-                EventBus.getDefault().post(new BusSynchro("event", error));
+//                EventBus.getDefault().post(new BusSynchro("event", error));
             }
 
         }else{
@@ -113,7 +110,7 @@ public class SynchroService extends IntentService {
             error = "Network (WIFI/GSM) - OFF";
         }
         Log.d(TAG, String.valueOf(message));
-        EventBus.getDefault().post(new BusSynchro(type, error));
+//        EventBus.getDefault().post(new BusSynchro(type, error));
     }
 
     @Override
@@ -128,7 +125,6 @@ public class SynchroService extends IntentService {
 
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        //should check null because in air plan mode it will be null
         return (netInfo != null && netInfo.isConnected());
 
     }
@@ -228,8 +224,8 @@ public class SynchroService extends IntentService {
                 + ", sourceId=" + extras.getInt(Const.SOURCE_ID_API_KEY)
                 + ", datatime=" + extras.getString(Const.DATATIME_API_KEY)
                 + ", location=" + extras.getString(Const.LOCATION_API_KEY)
-                + ", gps=" + extras.getString(Const.GPS_API_KEY)
-                + ", id=" + extras.getString(Const.IDENTIFICATOR_API_KEY));
+                + ", gps=" + extras.getString(Const.GPS_API_KEY));
+//                + ", id=" + extras.getString(Const.IDENTIFICATOR_API_KEY));
 //                + ", employeeId=" + extras.getLong(Const.EMPLOYEE_ID_API_KEY)
 //                + ", device_code=" + extras.getString(Const.DEVICE_CODE_API_KEY));
 
@@ -253,6 +249,8 @@ public class SynchroService extends IntentService {
                 Log.i(TAG, "Succes-true");
 
                 int isEventSend = 1;
+                Log.d(TAG,"----"+String.valueOf(lastAddedEventId));
+
                 DbAdapter db = new DbAdapter(context);
                 db.updateEventStatus(lastAddedEventId, isEventSend);
                 db.close();

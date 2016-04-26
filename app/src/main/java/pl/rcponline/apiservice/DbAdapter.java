@@ -14,6 +14,7 @@ import com.androidquery.callback.AjaxStatus;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
+import com.google.gson.internal.Streams;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
@@ -28,7 +29,7 @@ import java.util.List;
 public class DbAdapter {
 
     private final String TAG = "DATABASE";
-    private static final int DATABASE_VESRION = 7;
+    private static final int DATABASE_VESRION = 8;
     private static final String DATABASE_NAME = "Rcp.db";
 
     //liczba wyswietlonych ostatnich eventow
@@ -37,6 +38,7 @@ public class DbAdapter {
     //zmienna do przechowywania bazy
     private SQLiteDatabase db;
     private Context context;
+
     //helper do otwierania i aktualizowania bazy
     private DbHelper dbH;
 
@@ -44,7 +46,6 @@ public class DbAdapter {
         context = _context;
         dbH = new DbHelper(_context, DATABASE_NAME, null, DATABASE_VESRION);
     }
-
 
     public static abstract class EventsInfo implements BaseColumns {
 
@@ -60,14 +61,14 @@ public class DbAdapter {
     }
 
     private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + EventsInfo.TABLE_NAME + "(" +
-                EventsInfo._ID          +   " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                EventsInfo.KEY_TYPE_ID  +   " INTEGER,"+
-                EventsInfo.KEY_SOURCE_ID+   " INTEGER,"+
-                EventsInfo.KEY_DATETIME +   " DATETIME,"+
-                EventsInfo.KEY_LOCATION +   " TEXT,"+
-                EventsInfo.KEY_GPS      +   " TEXT,"+
-                EventsInfo.KEY_COMMENT  +   " TEXT,"+
-                EventsInfo.KEY_STATUS   +   " INTEGER DEFAULT 0);";
+            EventsInfo._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+            EventsInfo.KEY_TYPE_ID + " INTEGER," +
+            EventsInfo.KEY_SOURCE_ID + " INTEGER," +
+            EventsInfo.KEY_DATETIME + " DATETIME," +
+            EventsInfo.KEY_LOCATION + " TEXT," +
+            EventsInfo.KEY_GPS + " TEXT," +
+            EventsInfo.KEY_COMMENT + " TEXT," +
+            EventsInfo.KEY_STATUS + " INTEGER DEFAULT 0);";
 
     private static final String DELETE_TABLE = "DROP TABLE IF EXISTS "+ EventsInfo.TABLE_NAME;
 
@@ -115,13 +116,14 @@ public class DbAdapter {
 
 
         ContentValues cv = new ContentValues();
-        cv.put(EventsInfo.KEY_TYPE_ID,  _event.getType());
-        cv.put(EventsInfo.KEY_SOURCE_ID,_event.getSource());
+        cv.put(EventsInfo.KEY_TYPE_ID, _event.getType());
+        cv.put(EventsInfo.KEY_SOURCE_ID, _event.getSource());
         cv.put(EventsInfo.KEY_DATETIME, _event.getDatetime().toString());
         cv.put(EventsInfo.KEY_LOCATION, _event.getLocation());
         cv.put(EventsInfo.KEY_GPS, _event.getGPS());
-        cv.put(EventsInfo.KEY_COMMENT,  _event.getComment());
-        cv.put(EventsInfo.KEY_STATUS,   _event.getStatus());
+        cv.put(EventsInfo.KEY_COMMENT, _event.getComment());
+        cv.put(EventsInfo.KEY_STATUS, _event.getStatus());
+
         long result = db.insert(EventsInfo.TABLE_NAME, null, cv);
         Log.d("DATABASE","result: "+String.valueOf(result));
         return result;
@@ -144,72 +146,48 @@ public class DbAdapter {
 
     }
     public long updateEventStatus(long eventId, int status){
+        db = dbH.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(EventsInfo.KEY_STATUS, status);
+        Log.d(TAG,String.valueOf(eventId));
 
+//        return db.update(EventsInfo.TABLE_NAME, values, EventsInfo._ID + " = " + eventId, null);
         long result = db.update(EventsInfo.TABLE_NAME, values, EventsInfo._ID + " = " + eventId, null);
+        Log.d(TAG,"RESULT-UPDATE_"+String.valueOf(result));
         return  result;
     }
 
     public Cursor getEventsWithStatus(int status) {
-
         db = dbH.getReadableDatabase();
-        //List<Event> events = new ArrayList<Event>();
         Cursor c = db.rawQuery("SELECT * FROM " + EventsInfo.TABLE_NAME + " WHERE status = ?", new String[]{Integer.toString(status)});
         return c;
     }
 
     public Cursor getLastEvents(){
-
         db = dbH.getReadableDatabase();
-
-        //List<Event> events = new ArrayList<Event>();
         Cursor c = db.rawQuery("SELECT * FROM " + EventsInfo.TABLE_NAME + " ORDER BY "+ EventsInfo.KEY_DATETIME +" DESC  LIMIT 0,"+NUMBER_LAST_EVENTS ,null);//new String[]{numberEvents});
         return  c;
     }
 
-    public int getLastEventType(){
+    public int getLastEventType() {
         db = dbH.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + EventsInfo.TABLE_NAME + " ORDER BY "+ EventsInfo.KEY_DATETIME +" DESC LIMIT 0,1",null);
+        Cursor c = db.rawQuery("SELECT * FROM " + EventsInfo.TABLE_NAME + " ORDER BY " + EventsInfo.KEY_DATETIME + " DESC LIMIT 0,1", null);
         int typeId = 0;
-        if(c.moveToFirst()){
-                typeId = c.getInt(c.getColumnIndex(EventsInfo.KEY_TYPE_ID));
+
+        if (c.moveToFirst()) {
+            typeId = c.getInt(c.getColumnIndex(EventsInfo.KEY_TYPE_ID));
         }
         c.close();
         return typeId;
     }
-    public Event getLastEvent(){
+
+    public Event getLastEvent() {
         db = dbH.getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + EventsInfo.TABLE_NAME + " ORDER BY "+ EventsInfo.KEY_DATETIME +" DESC LIMIT 0,1",null);
+        Cursor c = db.rawQuery("SELECT * FROM " + EventsInfo.TABLE_NAME + " ORDER BY " + EventsInfo.KEY_DATETIME + " DESC LIMIT 0,1", null);
 
-        if(c.moveToFirst()){
+        if (c.moveToFirst()) {
             Event event = new Event(
-                c.getInt(c.getColumnIndex(EventsInfo._ID)),
-                c.getInt(c.getColumnIndex(EventsInfo.KEY_TYPE_ID)),
-                        c.getInt(c.getColumnIndex(EventsInfo.KEY_SOURCE_ID)),
-                        c.getString(c.getColumnIndex(EventsInfo.KEY_DATETIME)),
-                        c.getString(c.getColumnIndex(EventsInfo.KEY_LOCATION)),
-                        c.getString(c.getColumnIndex(EventsInfo.KEY_GPS)),
-                        c.getString(c.getColumnIndex(EventsInfo.KEY_COMMENT)),
-                        c.getInt(c.getColumnIndex(EventsInfo.KEY_STATUS)),
-                    null);
-
-            c.close();
-            return event;
-        }else{
-            Event event = new Event();
-            return event;
-        }
-
-
-    }
-    public List<Event> cursorToEvents(Cursor c){
-        List<Event> events = new ArrayList<Event>();
-        if(c.moveToFirst()){
-
-            do{
-                    Event event = new Event(
                     c.getInt(c.getColumnIndex(EventsInfo._ID)),
                     c.getInt(c.getColumnIndex(EventsInfo.KEY_TYPE_ID)),
                     c.getInt(c.getColumnIndex(EventsInfo.KEY_SOURCE_ID)),
@@ -219,6 +197,30 @@ public class DbAdapter {
                     c.getString(c.getColumnIndex(EventsInfo.KEY_COMMENT)),
                     c.getInt(c.getColumnIndex(EventsInfo.KEY_STATUS)),
                     null);
+
+            c.close();
+            return event;
+        } else {
+            Event event = new Event();
+            return event;
+        }
+    }
+
+    public List<Event> cursorToEvents(Cursor c) {
+        List<Event> events = new ArrayList<Event>();
+
+        if (c.moveToFirst()) {
+            do {
+                Event event = new Event(
+                        c.getInt(c.getColumnIndex(EventsInfo._ID)),
+                        c.getInt(c.getColumnIndex(EventsInfo.KEY_TYPE_ID)),
+                        c.getInt(c.getColumnIndex(EventsInfo.KEY_SOURCE_ID)),
+                        c.getString(c.getColumnIndex(EventsInfo.KEY_DATETIME)),
+                        c.getString(c.getColumnIndex(EventsInfo.KEY_LOCATION)),
+                        c.getString(c.getColumnIndex(EventsInfo.KEY_GPS)),
+                        c.getString(c.getColumnIndex(EventsInfo.KEY_COMMENT)),
+                        c.getInt(c.getColumnIndex(EventsInfo.KEY_STATUS)),
+                        null);
 
                 /*Event event = new Event(
                         c.getInt(0),
@@ -232,12 +234,14 @@ public class DbAdapter {
                         null
                 );*/
                 events.add(event);
-            }while(c.moveToNext());
+
+            } while (c.moveToNext());
         }
+
         c.close();
         return events;
-
     }
+
     private String getDateTime(String dateTime) {
 
         String eventDate = new SimpleDateFormat("dd-MM-yyyy HH:mm").format(dateTime);
@@ -256,7 +260,5 @@ public class DbAdapter {
         db.delete(EventsInfo.TABLE_NAME,null,null);
 
         Log.d(TAG, "Wyczysznono tabele Events");
-
     }
-
 }
